@@ -10,6 +10,7 @@ import {
 import { SummaryTable } from '@nextcart/ui-commons';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { Product } from '@nextcart/models';
+import { useNavigate } from 'react-router-dom';
 
 interface CartItem {
   productId: string;
@@ -26,9 +27,13 @@ interface Props {
   onRemoveItem: (cartItemId: string) => void;
 }
 
-export function CartItemsTable({ items, onUpdateQuantity, onRemoveItem }: Props) {
+export function CartItemsTable({
+  items,
+  onUpdateQuantity,
+  onRemoveItem,
+}: Props) {
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null);
-
+  const navigate = useNavigate();
   const confirmRemove = () => {
     if (itemToRemove) {
       onRemoveItem(itemToRemove.cartItemId);
@@ -48,22 +53,31 @@ export function CartItemsTable({ items, onUpdateQuantity, onRemoveItem }: Props)
             header: 'Product',
             cell: (item) => (
               <SpaceBetween direction="horizontal" size="xs">
-                <span>{item.product?.name}</span>
+                <span>
+                  <Button
+                    variant="inline-link"
+                    onClick={() =>
+                      navigate(`/products/${item.product?.productId}`)
+                    }
+                  >
+                    {item.product?.name}
+                  </Button>
+                </span>
                 {item.warnings && item.warnings.length > 0 && (
                   <Popover
                     position="top"
                     size="small"
                     content={
                       <Box fontSize="body-s">
-                        {item.warnings
-                          .map((w) =>
-                            w === 'NOT_COMPATIBLE_WITH_DIET'
+                        {item.warnings.map((w, idx) => (
+                          <li key={idx}>
+                            {w === 'NOT_COMPATIBLE_WITH_DIET'
                               ? 'Not compatible with your diets'
                               : w === 'NOT_COMPATIBLE_WITH_CONDITION'
                               ? 'Not compatible with your health conditions'
-                              : 'Other incompatibility'
-                          )
-                          .join(', ')}
+                              : 'Other incompatibility'}
+                          </li>
+                        ))}
                       </Box>
                     }
                   >
@@ -85,7 +99,9 @@ export function CartItemsTable({ items, onUpdateQuantity, onRemoveItem }: Props)
             header: 'Actions',
             cell: (item) => (
               <SpaceBetween direction="horizontal" size="xs">
-                <Button onClick={() => onUpdateQuantity(item.cartItemId, 1)}>+</Button>
+                <Button onClick={() => onUpdateQuantity(item.cartItemId, 1)}>
+                  +
+                </Button>
                 <Button
                   disabled={item.quantity <= 1}
                   onClick={() => onUpdateQuantity(item.cartItemId, -1)}
@@ -129,8 +145,8 @@ export function CartItemsTable({ items, onUpdateQuantity, onRemoveItem }: Props)
         >
           <Box>
             Are you sure you want to remove{' '}
-            <strong>{itemToRemove.product?.name ?? 'this product'}</strong>{' '}
-            from the cart?
+            <strong>{itemToRemove.product?.name ?? 'this product'}</strong> from
+            the cart?
           </Box>
         </Modal>
       )}

@@ -49,11 +49,11 @@ import { CartModule } from '@nextcart/cart'
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost', // o IP del DB
-      port: 5432,
-      username: 'utente',
-      password: 'utente123',
-      database: 'nextcart',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'manu123',
+      database: process.env.DATABASE_NAME || 'nextcart',
       entities: [
         Consumer,
         HealthCondition,

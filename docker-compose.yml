@@ -1,37 +1,58 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  db:
-    image: postgres:16
-    restart: always
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: utente
-      POSTGRES_PASSWORD: utente123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: manu123
       POSTGRES_DB: nextcart
-    ports:
-      - '5432:5432'
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./db:/db  # cartella con il dump
+    ports:
+      - "5432:5432"
 
-  backend:
+  restore:
+    image: postgres:17-alpine
+    container_name: nextcart_restore
+    depends_on:
+      - postgres
+    environment:
+      PGPASSWORD: manu123
+    volumes:
+      - ./db:/db
+    command: >
+      sh -c "pg_restore --verbose --clean --no-acl --no-owner -h postgres -U postgres -d nextcart /db/nextcart.dump"
+    # Questo servizio lo userai solo per il restore e poi puoi rimuoverlo/commentarlo
+
+  api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    container_name: nextcart_api
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/nextcart
-    depends_on:
-      - db
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: manu123
+      DATABASE_NAME: nextcart
+      JWT_SECRET: supersegreto123
     ports:
-      - '3000:3000'
+      - "3000:3000"
+    depends_on:
+      - postgres
 
-  frontend:
+  web:
     build:
       context: .
       dockerfile: apps/website/Dockerfile
+    container_name: nextcart_web
     ports:
-      - '4200:80'
+      - "4200:80"
     depends_on:
-      - backend
+      - api
 
 volumes:
-  pgdata:
+  postgres_data:

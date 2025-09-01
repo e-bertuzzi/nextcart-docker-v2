@@ -8,8 +8,8 @@ async function seedClaims() {
     type: 'postgres',
     host: 'localhost',
     port: 5432,
-    username: 'utente',
-    password: 'utente123',
+    username: 'postgres',
+    password: 'manu123',
     database: 'nextcart',
     entities: ['libs/api/models/src/**/*.entity.{ts,js}'],
     synchronize: false,
@@ -35,7 +35,7 @@ async function seedClaims() {
   // ✅ Inserimento dei dati
   for (const claim of claimsData) {
     const c = new Claim();
-    c.claimsId = claim.claimsId;
+    c.claimId = claim.claimsId;
     c.description = claim.description;
     await claimRepo.save(c);
   }
