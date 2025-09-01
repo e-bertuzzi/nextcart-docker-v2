@@ -91,7 +91,7 @@ export function useEditProduct(productId: string) {
             product.nutritionalInformationValues
               ?.map((n: any) => ({
                 nutrientId: n.nutrient?.nutrientId,
-                value: n.value.toString(),
+                value: n.value != null ? n.value.toString() : '',
               }))
               .filter(
                 (n: { nutrientId: undefined }) => n.nutrientId !== undefined
